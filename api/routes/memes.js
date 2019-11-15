@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose'); //Utilizamos o Mongoose para fazer a integração com o MongoDB
+const postgres = require('../db/index');
 const Meme = require(process.cwd() + '/models/memeModel.js'); //Importando o modelo utilizado para o documento de Memes no BD
 const Sugestao = require(process.cwd() + '/models/sugestaoModel.js'); //Importando o modelo utilizado para o documento de Sugestões no BD
 

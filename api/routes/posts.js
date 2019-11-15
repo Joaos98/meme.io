@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose'); //Utilizamos o Mongoose para fazer a integração com o MongoDB
+const postgres = require('../db/index');
 const Denuncia = require(process.cwd() + '/models/denunciaModel.js'); //Importando o modelo utilizado para o documento de Denúncias no BD
 
 //Rota para criar uma denúncia de um post no banco de dados

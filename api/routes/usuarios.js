@@ -1,20 +1,36 @@
 const express = require('express');
 const router = express.Router();
+const postgres = require('../db/index');
 const mongoose = require('mongoose');
 const Usuario = require(process.cwd() + '/models/usuarioModel.js');
 
 //Rota que realiza a busca de usuários no banco de dados
 //Recebe uma query através da URL
 router.get('/', async (req, res) => {
-  if (req.query.recuperacao) {
-    req.query.recuperacao = { $all: req.query.recuperacao };
+  let chaves = Object.keys(req.query);
+  let query = "";
+  if (chaves.length > 0){
+    query += "where ";
   }
-  Usuario.find(req.query, (err, usuario) => {
+  for (let i = 0; i < chaves.length; i++){
+    query += chaves[i] + " = $" + (i+1)
+    if (i == chaves.length - 1){
+
+    }else{
+      query += ' AND '
+    }
+  }
+  let parametros = Object.keys(req.query).map(function(key) {
+    return req.query[key];
+  });
+  console.log(query);
+  postgres.query('SELECT * FROM usuarios ' + query, parametros, (err, resultado) => {
     if (err) {
-      console.log('Erro ao buscar usuário.');
+      console.log('Erro ao buscar usuário: ' + err);
       res.status(400).send('Erro ao buscar usuário.');
     } else {
-      res.status(200).send(usuario);
+      console.log(resultado);
+      res.status(200).send(resultado.rows);
     }
   });
 });
@@ -81,26 +97,15 @@ router.put('/banirUsuario:emailUsuario', (req, res) => {
 //Recebe um objeto com os atributos do novo usuário que será instanciado
 router.post('/', (req, res) => {
   console.log('Post recebido.');
-  const usuarioNovo = new Usuario({
-    nome: req.body.nome,
-    email: req.body.email,
-    senha: req.body.senha
-  });
-  usuarioNovo
-    .save()
-    .then(() => {
-      usuarioNovo._id = '[redatado]';
-      res
-        .status(200)
-        .send('Usuário salvo com sucesso' + usuarioNovo.toString());
-    })
-    .catch(err => {
-      usuarioNovo._id = '[redatado]';
-      res
-        .status(400)
-        .send('Problema salvando usuário' + usuarioNovo.toString());
+  const parametros = [req.body.nome, req.body.email, req.body.senha];
+  postgres.query('INSERT INTO usuarios (nome, email, senha) values ($1, $2, $3)', parametros, (err, resultado) => {
+    if (err){
       console.log(err);
-    });
+      res.status(400).send(err);
+    }else{
+      res.status(200).send(resultado.rows);
+    }
+  });
 });
 
 //Rota para desativar um usuário
