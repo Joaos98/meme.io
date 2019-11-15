@@ -284,7 +284,7 @@ class UsuariosRoute extends Route {
         const match = await bcrypt.compare(senhaAtual, req.user.senha);
         if (match) {
           axios
-            .put(rota + '/usuarios/desativarUsuario' + req.user._id)
+            .put(rota + '/usuarios/desativarUsuario' + req.user.id_usuario)
             .then(apiResponse => {
               //TODO: DISPLAY SUCCESS FLASH MESSAGE
               res.redirect('logout');
@@ -328,7 +328,7 @@ class UsuariosRoute extends Route {
         const nome = req.body.novoNome;
         if (UsuariosController.validarNome(nome)) {
           axios
-            .put(rota + '/usuarios' + '/atualizarNome' + req.user._id, {
+            .put(rota + '/usuarios' + '/atualizarNome' + req.user.id_usuario, {
               novoNome: nome
             })
             .then(apiResponse => {
@@ -360,7 +360,7 @@ class UsuariosRoute extends Route {
           if (respostaImgur != false){
               //Atualizando a foto do usuário
               axios
-                  .put(rota + '/usuarios/alterarFotoUsuario=' + req.user._id, {
+                  .put(rota + '/usuarios/alterarFotoUsuario=' + req.user.id_usuario, {
                       novaFoto: respostaImgur.data.data.link
                   })
                   .then(() => {
@@ -392,7 +392,7 @@ class UsuariosRoute extends Route {
           UsuariosController.validarEmail(email)
         ) {
           axios
-            .put(rota + '/usuarios' + '/atualizarEmail' + req.user._id, {
+            .put(rota + '/usuarios' + '/atualizarEmail' + req.user.id_usuario, {
               novoEmail: email
             })
             .then(apiResponse => {
@@ -426,7 +426,7 @@ class UsuariosRoute extends Route {
           let hash = bcrypt.hashSync(novaSenha, salt);
           novaSenha = hash;
           axios
-            .put(rota + '/usuarios' + '/atualizarSenha' + req.user._id, {
+            .put(rota + '/usuarios' + '/atualizarSenha' + req.user.id_usuario, {
               novaSenha: novaSenha
             })
             .then(apiResponse => {
@@ -486,7 +486,7 @@ class UsuariosRoute extends Route {
       (req, res) => {
         if (req.user.status == 1) {
           axios
-            .put(rota + '/usuarios' + '/reativarUsuario' + req.user._id)
+            .put(rota + '/usuarios' + '/reativarUsuario' + req.user.id_usuario)
             .catch(err => {
               console.log('Erro: ' + err.message);
             });
@@ -585,13 +585,13 @@ class UsuariosRoute extends Route {
     this.router.get('/redefinirSenha:chave', (req, res) => {
       let chave = req.params.chave;
       axios
-        .get(rota + '/usuarios?chave=' + chave)
+        .get(rota + '/usuarios?recuperacao_id=' + chave)
         .then(apiResponse => {
           if (apiResponse.data) {
             let date = new Date();
-            let validade = new Date(apiResponse.data[0].recuperacao[1]);
+            let validade = new Date(apiResponse.data[0].recuperacao_validade);
             let usuario = {
-              idUsuario: apiResponse.data[0]._id,
+              idUsuario: apiResponse.data[0].id_usuario,
               nome: apiResponse.data[0].nome
             };
             if (validade > date) {
@@ -665,13 +665,13 @@ class UsuariosRoute extends Route {
           console.log(err.message);
         });
       //Checar se o usuário está seguindo o meme no momento em que a chamada foi feita
-      if (!seguidores || !seguidores.includes(req.user._id)) {
+      if (!seguidores || !seguidores.includes(req.user.id_usuario+"")) {
         //Seguir o meme
-        let feed = client.feed('timeline', req.user._id);
+        let feed = client.feed('timeline', req.user.id_usuario);
         feed.follow('meme', req.body.memeID);
       } else {
         //Deixar de seguir o meme
-        let feed = client.feed('timeline', req.user._id);
+        let feed = client.feed('timeline', req.user.id_usuario);
         feed.unfollow('meme', req.body.memeID);
       }
     });
@@ -697,13 +697,13 @@ class UsuariosRoute extends Route {
         });
 
       //Checar se o usuário autenticado está seguindo o outro usuário no momento em que a chamada foi feita
-      if (!seguidores || !seguidores.includes(req.user._id)) {
+      if (!seguidores || !seguidores.includes(req.user.id_usuario+"")) {
         //Seguir o usuário
-        let feed = client.feed('timeline', req.user._id);
+        let feed = client.feed('timeline', req.user.id_usuario);
         feed.follow('user', req.body.usuarioVisitadoID);
       } else {
         //Deixar de seguir o usuário
-        let feed = client.feed('timeline', req.user._id);
+        let feed = client.feed('timeline', req.user.id_usuario);
         feed.unfollow('user', req.body.usuarioVisitadoID);
       }
     });

@@ -36,10 +36,10 @@
         </div>
             <div style="position: absolute; right: 15px; top: 15px;">
                 <% if (usuario) { %>
-                    <% if (seguidores.includes(usuario._id)) { %>
-                        <button onclick="seguirMeme('<%= meme._id %>', '<%= usuario._id %>', this)" class="btn btn-memeIO">Seguindo</button>
+                    <% if (seguidores.includes(usuario.id_usuario+"")) { %>
+                        <button onclick="seguirMeme('<%= meme._id %>', '<%= usuario.id_usuario %>', this)" class="btn btn-memeIO">Seguindo</button>
                     <% } else { %>
-                        <button onclick="seguirMeme('<%= meme._id %>', '<%= usuario._id %>', this)" class="btn btn-memeIO">Seguir</button>
+                        <button onclick="seguirMeme('<%= meme._id %>', '<%= usuario.id_usuario %>', this)" class="btn btn-memeIO">Seguir</button>
                     <% } %>
                 <% } %>
                 <a target="_blank" class="btn btn-memeIO" href="<%= meme.urlImgur%>">

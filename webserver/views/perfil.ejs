@@ -40,11 +40,11 @@
                 </div>
             </div>
             <div style="position: absolute; right: 15px; top: 15px;">
-                <% if (usuarioVisitado._id != usuario._id) { %>
-                    <% if (seguidores.includes(usuario._id)) { %>
-                        <button onclick="seguirUsuario('<%= usuarioVisitado._id %>', '<%= usuario._id %>', this)" class="btn btn-memeIO">Seguindo</button>
+                <% if (usuarioVisitado.id_usuario != usuario.id_usuario) { %>
+                    <% if (seguidores.includes(usuario.id_usuario+"")) { %>
+                        <button onclick="seguirUsuario('<%= usuarioVisitado.id_usuario %>', '<%= usuario.id_usuario %>', this)" class="btn btn-memeIO">Seguindo</button>
                     <% } else { %>
-                        <button onclick="seguirUsuario('<%= usuarioVisitado._id %>', '<%= usuario._id %>', this)" class="btn btn-memeIO">Seguir</button>
+                        <button onclick="seguirUsuario('<%= usuarioVisitado.id_usuario %>', '<%= usuario.id_usuario %>', this)" class="btn btn-memeIO">Seguir</button>
                     <% } %>
                 <% } %>
             </div>
