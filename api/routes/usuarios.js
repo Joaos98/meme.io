@@ -23,13 +23,11 @@ router.get('/', async (req, res) => {
   let parametros = Object.keys(req.query).map(function(key) {
     return req.query[key];
   });
-  console.log(query);
   postgres.query('SELECT * FROM usuarios ' + query, parametros, (err, resultado) => {
     if (err) {
       console.log('Erro ao buscar usuário: ' + err);
       res.status(400).send('Erro ao buscar usuário.');
     } else {
-      console.log(resultado);
       res.status(200).send(resultado.rows);
     }
   });

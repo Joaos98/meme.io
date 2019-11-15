@@ -28,7 +28,7 @@ class IndexRoute extends Route {
           })
           .catch(err => console.log('Erro ao buscar memes na API.'));
         await client
-          .feed('timeline', req.user._id)
+          .feed('timeline', req.user.id_usuario)
           .get({ limit: 20, offset: 0, reactions: { own: true, counts: true } })
           .then(apiResponse => {
             feed = apiResponse;

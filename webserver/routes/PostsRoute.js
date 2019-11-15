@@ -48,16 +48,16 @@ class PostsRoute extends Route {
           let now = new Date();
           now = date.format(now, 'DD/MM/YYYY');
           //Criando o post na API do Get Stream
-          let user = client.feed('user', req.user._id);
+          let user = client.feed('user', req.user.id_usuario);
           let activity = {
-            actor: 'User:' + req.user._id,
+            actor: 'User:' + req.user.id_usuario,
             verb: 'post',
             object: 0,
             nome: req.user.nome,
             url: respostaImgur.data.data.link,
             to: [
               'meme:' + req.body.memeID,
-              'timeline:' + req.user._id,
+              'timeline:' + req.user.id_usuario,
               'trending:trending'
             ],
             conteudo: req.body.conteudoPost,
@@ -214,7 +214,7 @@ class PostsRoute extends Route {
       });
       //Checar se o post já está curtido pelo usuário no momento da chamada
       reactions.results.forEach(like => {
-        if (like.user_id == req.user._id) {
+        if (like.user_id == req.user.id_usuario) {
           likeID = like.id;
         }
       });

@@ -113,7 +113,7 @@ class UsuariosRoute extends Route {
         //Checar se o objetivo é visitar o perfil do usuário autenticado ou de outro usuário
         if (req.query.usuario == req.user.email) {
           await client
-            .feed('user', req.user._id)
+            .feed('user', req.user.id_usuario)
             .get({
               limit: 20,
               offset: 0,
@@ -146,7 +146,7 @@ class UsuariosRoute extends Route {
                 '54136'
               );
               await client2
-                .feed('user', usuario._id)
+                .feed('user', usuario.id_usuario)
                 .get({
                   limit: 20,
                   offset: 0,
@@ -160,7 +160,7 @@ class UsuariosRoute extends Route {
                 });
               //Pegar os seguidores do usuário buscado para saber se o usuário autenticado já segue ele
               await client
-                .feed('user', usuario._id)
+                .feed('user', usuario.id_usuario)
                 .followers()
                 .then(results => {
                   results.results.forEach(objeto => {
@@ -648,7 +648,7 @@ class UsuariosRoute extends Route {
       let seguidores = [];
 
       try {
-        await axios.get(rota + '/usuarios?_id=' + req.body.usuarioID);
+        await axios.get(rota + '/usuarios?id_usuario=' + req.body.usuarioID);
       } catch (err) {
         console.log('Erro ao buscar usuário: ' + err.message);
       }
@@ -682,7 +682,7 @@ class UsuariosRoute extends Route {
       let seguidores = [];
 
       try {
-        await axios.get(rota + '/usuarios?_id=' + req.body.usuarioID);
+        await axios.get(rota + '/usuarios?id_usuario=' + req.body.usuarioID);
       } catch (err) {
         console.log('Erro ao buscar usuário: ' + err.message);
       }

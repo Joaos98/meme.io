@@ -13,12 +13,12 @@ const client = stream.connect(
 
 module.exports = passport => {
   passport.serializeUser((user, done) => {
-    const userToken = client.createUserToken(user._id);
-    done(null, { _id: user._id, userToken: userToken });
+    const userToken = client.createUserToken(""+user.id_usuario);
+    done(null, { _id: ""+user.id_usuario, userToken: userToken });
   });
 
   passport.deserializeUser((id, done) => {
-    axios.get(rota + '/usuarios?_id=' + id._id).then(apiResponse => {
+    axios.get(rota + '/usuarios?id_usuario=' + id._id).then(apiResponse => {
       let usuario = apiResponse.data[0];
       usuario.userToken = id.userToken;
       done(null, usuario);
