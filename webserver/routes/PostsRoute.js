@@ -137,11 +137,9 @@ class PostsRoute extends Route {
     this.router.post('/aceitarDenuncia', async (req, res) => {
       //Atualizar o número de denúncias aceitas do usuário
       await axios
-        .put(rota + '/usuarios/atualizarDenuncia' + req.body.idUsuario)
+        .put(rota + '/usuarios/aceitarDenuncia' + req.body.idDenuncia)
         .then(apiResponse => {
-          if (apiResponse.status == 400) {
-            console.log('Erro ao aceitar a denuncia na API.');
-          }
+
         })
         .catch(err => {
           if (err) {
@@ -149,19 +147,7 @@ class PostsRoute extends Route {
           }
         });
 
-      //Deletar as denúncias referentes a esse post do banco de dados
-      await axios
-        .delete(rota + '/posts/deletarDenuncias?postID=' + req.body.idPost)
-        .then(apiResponse => {
-          if (apiResponse.status == 400) {
-            console.log('Erro ao deletar a sugestão na API.');
-          }
-        })
-        .catch(err => {
-          console.log('Erro ao tentar deletar a sugestão.');
-          res.redirect('../usuarios/configuracoes');
-        });
-      //Deletas a imagem do post do Imgur
+      //Deletar a imagem do post do Imgur
       await axios
         .delete('https://api.imgur.com/3/image/' + req.body.idImgur, {
           headers: { Authorization: `Bearer ${apiKeys.imgurAccessToken}` }
