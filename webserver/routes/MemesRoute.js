@@ -336,7 +336,7 @@ class MemesRoute extends Route {
               html =
                 html +
                 "<img data-idMeme='" +
-                meme._id +
+                meme.id_meme +
                 "'onclick='associarMeme(this)' data-dismiss='modal' style='cursor:pointer;' class='memeImage' src='" +
                 meme.urlImgur +
                 "'>";

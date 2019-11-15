@@ -24,7 +24,7 @@
     <% if(memes.length > 0) { %>
             <% memes.forEach((meme) => { %>
                 <div class="card memeCard" style="width: 18rem; margin: 10px">
-                    <img class="card-img-top" src=<%= meme.urlImgur%> alt="Imagem do meme">
+                    <img class="card-img-top" src=<%= meme.urlimgur%> alt="Imagem do meme">
                     <div class="card-body">
                         <h5 class="card-title">Categorias</h5>
                         <p class="card-text">
@@ -33,14 +33,14 @@
                             <% });%>
                         </p>
                         <form method="post" action="/memes/acessarPerfilMeme" style="display: inline-block;">
-                            <input name="memeID" type="hidden" value="<%= meme._id %>">
+                            <input name="memeID" type="hidden" value="<%= meme.id_meme %>">
                             <button type="submit" class="btn btn-memeIO">Perfil do meme</button>
                         </form>
                         <% if (usuario) { %>
                             <% if (usuario.adm == 1) { %>
                                 <form method="post" action="/memes/deletarMeme" style="display: inline-block;">
                                     <!-- Input invisível que vai armazenar o ID do meme para fazer a exclusão -->
-                                    <input name="memeID" type="hidden" value="<%= meme._id %>">
+                                    <input name="memeID" type="hidden" value="<%= meme.id_meme %>">
                                     <!-- Input invisível que vai armazenar a página de onde a requisição foi feita -->
                                     <input name="paginaEnviada" type="hidden" value="/memes">
                                     <button type="submit" class="btn btn-memeIO"><i class="fas fa-trash-alt"></i></button>
@@ -48,13 +48,13 @@
                             <% } %>
                         <% } %>
                         <% if (usuario) { %>
-                        <button data-toggle="collapse" data-target="#<%= meme._id %>" type="button" class="btn btn-memeIO">
+                        <button data-toggle="collapse" data-target="#<%= meme.id_meme %>" type="button" class="btn btn-memeIO">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <div id="<%= meme._id %>" class="row collapse" style="margin: 5px 0px; border-top: 1px solid #dadada; padding: 5px 0px;">
+                        <div id="<%= meme.id_meme %>" class="row collapse" style="margin: 5px 0px; border-top: 1px solid #dadada; padding: 5px 0px;">
                             <form class="" method="post" action="/memes/criarSugestao" style="display: block;">
                                 <!-- Input invisível que vai armazenar o ID do meme para fazer as alterações -->
-                                <input name="memeID" type="hidden" value="<%= meme._id %>">
+                                <input name="memeID" type="hidden" value="<%= meme.id_meme %>">
                                 <input name="novasCategorias" type="text" class="memeCategory" placeholder="Novas categorias" style="width: 179px" required>
                                 <button type="submit" class="btn btn-memeIO">
                                     <i class="fas fa-paper-plane"></i>

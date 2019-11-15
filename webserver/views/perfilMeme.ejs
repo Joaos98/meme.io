@@ -16,7 +16,7 @@
         <div id="memeCard" style="position:relative;" class="border-memeProfile rounded">
             <div class="row">
                 <div class="col-sm-2">
-                    <img src="<%= meme.urlImgur%>">
+                    <img src="<%= meme.urlimgur%>">
                 </div>
                 <div class="col-sm-9">
                 <div class="row">
@@ -37,12 +37,12 @@
             <div style="position: absolute; right: 15px; top: 15px;">
                 <% if (usuario) { %>
                     <% if (seguidores.includes(usuario.id_usuario+"")) { %>
-                        <button onclick="seguirMeme('<%= meme._id %>', '<%= usuario.id_usuario %>', this)" class="btn btn-memeIO">Seguindo</button>
+                        <button onclick="seguirMeme('<%= meme.id_meme %>', '<%= usuario.id_usuario %>', this)" class="btn btn-memeIO">Seguindo</button>
                     <% } else { %>
-                        <button onclick="seguirMeme('<%= meme._id %>', '<%= usuario.id_usuario %>', this)" class="btn btn-memeIO">Seguir</button>
+                        <button onclick="seguirMeme('<%= meme.id_meme %>', '<%= usuario.id_usuario %>', this)" class="btn btn-memeIO">Seguir</button>
                     <% } %>
                 <% } %>
-                <a target="_blank" class="btn btn-memeIO" href="<%= meme.urlImgur%>">
+                <a target="_blank" class="btn btn-memeIO" href="<%= meme.urlimgur%>">
                     <i class="fas fa-external-link-alt"></i>
                 </a>
             </div>
