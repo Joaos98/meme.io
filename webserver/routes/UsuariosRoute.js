@@ -108,23 +108,18 @@ class UsuariosRoute extends Route {
       SessionController.authenticationMiddleware(),
       async (req, res) => {
         let usuario;
-        let feed;
+        let feed = [];
         let seguidores = [];
+
+        //buscar feed do usuario
+        await axios
+          .get(rota + '/posts/feedusuario?email=' + req.query.usuario)
+          .then(apiResponse => {
+              feed = apiResponse.data;
+        });
+
         //Checar se o objetivo é visitar o perfil do usuário autenticado ou de outro usuário
         if (req.query.usuario == req.user.email) {
-          await client
-            .feed('user', req.user.id_usuario)
-            .get({
-              limit: 20,
-              offset: 0,
-              reactions: { own: true, counts: true }
-            })
-            .then(apiResponse => {
-              feed = apiResponse;
-            })
-            .catch(err => {
-              console.log('Erro ao buscar feed.');
-            });
           usuario = req.user;
           //Renderizar a página de perfil com as informações do usuário autenticado
           res.render('perfil.ejs', {
@@ -134,41 +129,22 @@ class UsuariosRoute extends Route {
             feed: feed
           });
         } else {
-          //Buscar o outro usuário no banco de dados
-          await axios
-            .get(rota + '/usuarios?email=' + req.query.usuario)
-            .then(async ({ data }) => {
-              usuario = data[0];
-              //Pegar o feed do outro usuário
-              const client2 = stream.connect(
-                '55j5n3pfjx3u',
-                req.user.userToken,
-                '54136'
-              );
-              await client2
-                .feed('user', usuario.id_usuario)
-                .get({
-                  limit: 20,
-                  offset: 0,
-                  reactions: { own: true, counts: true }
-                })
+            //Pegar informações do usuário
+            await axios
+                .get(rota + '/usuarios/?email=' + req.query.usuario)
                 .then(apiResponse => {
-                  feed = apiResponse;
-                })
-                .catch(err => {
-                  console.log('Erro ao buscar feed.');
+                    usuario = apiResponse.data[0];
+                }).catch(err =>{
+                    console.log(err);
                 });
-              //Pegar os seguidores do usuário buscado para saber se o usuário autenticado já segue ele
-              await client
-                .feed('user', usuario.id_usuario)
-                .followers()
-                .then(results => {
-                  results.results.forEach(objeto => {
-                    seguidores.push(objeto.feed_id.substring(9));
-                  });
-                })
-                .catch(err => {
-                  console.log(err.message);
+            //Pegar os seguidores do usuário buscado para saber se o usuário autenticado já segue ele
+            await axios
+                .get(rota + '/usuarios/seguidores?id=' + usuario.id_usuario)
+                .then(apiResponse => {
+                seguidores = apiResponse.data[0].id_usuario;
+            })
+                .catch(err =>{
+                    console.log(err);
                 });
               //Renderizar a página de perfil com as informações do outro usuário buscado
               res.render('perfil.ejs', {
@@ -178,11 +154,6 @@ class UsuariosRoute extends Route {
                 feed: feed,
                 seguidores: seguidores
               });
-            })
-            .catch(err => {
-              console.log('Erro ao buscar usuário.');
-              res.redirect('configuracoes');
-            });
         }
       }
     );
@@ -647,65 +618,42 @@ class UsuariosRoute extends Route {
     this.router.post('/seguirMeme', async (req, res) => {
       let seguidores = [];
 
-      try {
-        await axios.get(rota + '/usuarios?id_usuario=' + req.body.usuarioID);
-      } catch (err) {
-        console.log('Erro ao buscar usuário: ' + err.message);
-      }
-
-      await client
-        .feed('meme', req.body.memeID)
-        .followers()
-        .then(results => {
-          results.results.forEach(objeto => {
-            seguidores.push(objeto.feed_id.substring(9));
-          });
-        })
-        .catch(err => {
-          console.log(err.message);
-        });
+        await axios.get(rota + '/memes/seguidores?id=' + req.body.memeID)
+            .then(apiResponse =>{
+                seguidores = apiResponse.data[0].id_usuario;
+            })
+            .catch(err => {
+                console.log(err)
+            });
       //Checar se o usuário está seguindo o meme no momento em que a chamada foi feita
-      if (!seguidores || !seguidores.includes(req.user.id_usuario+"")) {
+      if (!seguidores || !seguidores.includes(req.user.id_usuario)) {
         //Seguir o meme
-        let feed = client.feed('timeline', req.user.id_usuario);
-        feed.follow('meme', req.body.memeID);
+        axios.put(rota+'/usuarios/seguirMeme'+req.user.id_usuario+'/'+req.body.memeID);
       } else {
         //Deixar de seguir o meme
-        let feed = client.feed('timeline', req.user.id_usuario);
-        feed.unfollow('meme', req.body.memeID);
+          axios.put(rota+'/usuarios/unfollowMeme'+req.user.id_usuario+'/'+req.body.memeID);
       }
     });
 
     //Rota que segue um usuário
     //Recebe o ID do usuário a ser seguido
     this.router.post('/seguirUsuario', async (req, res) => {
-      let seguidores = [];
-
-      try {
-        await axios.get(rota + '/usuarios?id_usuario=' + req.body.usuarioID);
-      } catch (err) {
-        console.log('Erro ao buscar usuário: ' + err.message);
-      }
-
-      await client
-        .feed('user', req.body.usuarioVisitadoID)
-        .followers()
-        .then(results => {
-          results.results.forEach(objeto => {
-            seguidores.push(objeto.feed_id.substring(9));
-          });
-        });
-
-      //Checar se o usuário autenticado está seguindo o outro usuário no momento em que a chamada foi feita
-      if (!seguidores || !seguidores.includes(req.user.id_usuario+"")) {
-        //Seguir o usuário
-        let feed = client.feed('timeline', req.user.id_usuario);
-        feed.follow('user', req.body.usuarioVisitadoID);
-      } else {
-        //Deixar de seguir o usuário
-        let feed = client.feed('timeline', req.user.id_usuario);
-        feed.unfollow('user', req.body.usuarioVisitadoID);
-      }
+        let seguidores = [];
+        await axios.get(rota + '/usuarios/seguidores?id=' + req.body.usuarioVisitadoID)
+            .then(apiResponse =>{
+                seguidores = apiResponse.data[0].id_usuario;
+            })
+            .catch(err => {
+                console.log(err)
+            });
+        //Checar se o usuário está seguindo o outro no momento em que a chamada foi feita
+        if (!seguidores || !seguidores.includes(req.user.id_usuario)) {
+            //Seguir o usuario
+            axios.put(rota+'/usuarios/seguirUsuario'+req.user.id_usuario+'/'+req.body.usuarioVisitadoID);
+        } else {
+            //Deixar de seguir o usuario
+            axios.put(rota+'/usuarios/unfollowUsuario'+req.user.id_usuario+'/'+req.body.usuarioVisitadoID);
+        }
     });
   }
 }

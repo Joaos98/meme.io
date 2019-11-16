@@ -28,7 +28,6 @@ module.exports = passport => {
   passport.use(
     new LocalStrategy((username, password, done) => {
       axios.get(rota + '/usuarios?email=' + username).then(apiResponse => {
-        console.log(apiResponse);
         if (apiResponse.status != 200) {
           return done(err);
         }

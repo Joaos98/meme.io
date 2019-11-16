@@ -18,8 +18,8 @@ class IndexRoute extends Route {
     this.router.get('/', async (req, res) => {
       //Verificar se o usuário está autenticado para decidir qual página exibir
       if (req.user) {
-        let memes;
-        let feed;
+        let memes = [];
+        let feed = [];
         //TODO: BUSCAR APENAS POR MEMES APROVADOS
         await axios
           .get(rota + '/memes')
@@ -27,15 +27,12 @@ class IndexRoute extends Route {
             memes = apiResponse.data;
           })
           .catch(err => console.log('Erro ao buscar memes na API.'));
-        await client
-          .feed('timeline', req.user.id_usuario)
-          .get({ limit: 20, offset: 0, reactions: { own: true, counts: true } })
-          .then(apiResponse => {
-            feed = apiResponse;
-          })
-          .catch(err => {
-            console.log('Erro ao buscar feed.');
-          });
+        await axios
+            .get(rota + '/posts/timeline?id_usuario='+req.user.id_usuario)
+            .then(apiResponse => {
+              feed = apiResponse.data;
+            })
+            .catch(err => console.log('Erro ao buscar posts na API.'));
         res.render('feed.ejs', { usuario: req.user, memes: memes, feed: feed });
       } else {
         res.render('landingpage.ejs', {});
@@ -69,25 +66,13 @@ class IndexRoute extends Route {
       '/trending',
       SessionController.authenticationMiddleware(),
       async (req, res) => {
-        let feed;
-        //Criar o feed customizado da página de trending
-        await client
-          .feed('trending', 'trending')
-          .get({ limit: 20, offset: 0, reactions: { own: true, counts: true } })
-          .then(apiResponse => {
-            feed = apiResponse;
-          })
-          .catch(err => {
-            console.log('Erro ao buscar feed.');
-          });
-        //Ordenar o array com os posts do feed de acordo com o número de reações
-        feed.results.forEach(post => {
-          if (Object.getOwnPropertyNames(post.reaction_counts).length == 0) {
-            post.reaction_counts = { like: 0 };
-          }
-        });
-        feed.results = bubbleSort(feed.results);
-        feed.results = feed.results.reverse();
+        let feed = [];
+        await axios
+            .get(rota + '/posts/feedTrending')
+            .then(apiResponse => {
+              feed = apiResponse.data;
+            })
+            .catch(err => console.log('Erro ao buscar posts na API.'));
         res.render('trending.ejs', { feed: feed, usuario: req.user });
       }
     );

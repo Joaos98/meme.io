@@ -36,7 +36,7 @@
         </div>
             <div style="position: absolute; right: 15px; top: 15px;">
                 <% if (usuario) { %>
-                    <% if (seguidores.includes(usuario.id_usuario+"")) { %>
+                    <% if (seguidores && seguidores.includes(usuario.id_usuario)) { %>
                         <button onclick="seguirMeme('<%= meme.id_meme %>', '<%= usuario.id_usuario %>', this)" class="btn btn-memeIO">Seguindo</button>
                     <% } else { %>
                         <button onclick="seguirMeme('<%= meme.id_meme %>', '<%= usuario.id_usuario %>', this)" class="btn btn-memeIO">Seguir</button>

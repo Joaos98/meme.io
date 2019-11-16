@@ -32,7 +32,6 @@ const upload = multer({ storage: storage });
 class PostsRoute extends Route {
   constructor(basePath) {
     super('/posts');
-
     //Rota para criar um post no banco de dados
     //Recebe uma imagem, uma string com o conteúdo do post e o ID do meme associado
     this.router.post(
@@ -47,33 +46,22 @@ class PostsRoute extends Route {
           //Criando uma data
           let now = new Date();
           now = date.format(now, 'DD/MM/YYYY');
-          //Criando o post na API do Get Stream
-          let user = client.feed('user', req.user.id_usuario);
-          let activity = {
-            actor: 'User:' + req.user.id_usuario,
-            verb: 'post',
-            object: 0,
-            nome: req.user.nome,
-            url: respostaImgur.data.data.link,
-            to: [
-              'meme:' + req.body.memeID,
-              'timeline:' + req.user.id_usuario,
-              'trending:trending'
-            ],
-            conteudo: req.body.conteudoPost,
-            urlImgUsuario: req.user.foto,
-            idImgur: respostaImgur.data.data.id,
-            data: now
+          let post = {
+              id_meme : req.body.memeID,
+              id_usuario : req.user.id_usuario,
+              urlimgur  : respostaImgur.data.data.link,
+              conteudo: req.body.conteudoPost,
+              idImgur: respostaImgur.data.data.id,
+              data: now
           };
-          user
-              .addActivity(activity)
-              .then(() => {
-                res.status(200).redirect('/');
-              })
-              .catch(reason => {
-                //TODO: ERROR FLASH MESSAGE
-                console.log("erro: " + reason.error);
-              });
+            axios
+                .post(rota + '/posts/criarPost', post)
+                .then(() => {
+                    res.status(200).redirect('/');
+                })
+                .catch(err => {
+                    console.log('erro do catch do post pra nossa api: ' + err);
+                });
         }else{
             //Caso a foto não tenha sido armazenada no Imgur
             console.log('Erro ao enviar a imagem para o Imgur');
@@ -87,28 +75,27 @@ class PostsRoute extends Route {
       '/deletePost',
       SessionController.authenticationMiddleware(),
       (req, res) => {
-        //Deletar o post da API do Get Stream
-        client
-          .feed('user', req.body.userID)
-          .removeActivity(req.body.postID)
-          .then()
-          .catch(err => {
-            if (err) {
-              console.log('Erro ao deletar o post:' + err.message);
-            }
-          });
-        //Excluir a foto do meme armazenada no Imgur
-        axios
-          .delete('https://api.imgur.com/3/image/' + req.body.idImgur, {
-            headers: { Authorization: `Bearer ${apiKeys.imgurAccessToken}` }
-          })
-          .then(() => {
-            res.sendStatus(200);
-          })
-          .catch(err => {
-            console.log('Erro ao excluir a imagem do imgur: ' + err);
-            res.sendStatus(400);
-          });
+        //Deletar o post do banco
+          axios
+              .delete(rota + '/posts/deletarPost?_id=' + req.body.postID)
+              .then(() => {
+                  //Excluir a foto do meme armazenada no Imgur
+                  axios
+                      .delete('https://api.imgur.com/3/image/' + req.body.idImgur, {
+                          headers: { Authorization: `Bearer ${apiKeys.imgurAccessToken}` }
+                      })
+                      .then(() => {
+                          res.sendStatus(200);
+                      })
+                      .catch(err => {
+                          console.log('Erro ao excluir a imagem do imgur: ' + err);
+                          res.sendStatus(400);
+                      });
+              })
+              .catch(err => {
+                  console.log('Erro ao excluir post: ' + err);
+                  res.sendStatus(400);
+              });
       }
     );
 
@@ -135,37 +122,23 @@ class PostsRoute extends Route {
     //Rota para aceitar uma denúncia
     //Recebe o ID do usuário que fez o post que foi denunciado, o ID do post e o ID da imagem do post no Imgur
     this.router.post('/aceitarDenuncia', async (req, res) => {
-      //Atualizar o número de denúncias aceitas do usuário
-      await axios
-        .put(rota + '/usuarios/aceitarDenuncia' + req.body.idDenuncia)
-        .then(apiResponse => {
-
-        })
-        .catch(err => {
-          if (err) {
-            console.log('Erro ao tentar aceitar a denuncia: ' + err.message);
-          }
-        });
-
-      //Deletar a imagem do post do Imgur
-      await axios
-        .delete('https://api.imgur.com/3/image/' + req.body.idImgur, {
-          headers: { Authorization: `Bearer ${apiKeys.imgurAccessToken}` }
-        })
-        .then()
-        .catch(err => {
-          console.log('Erro ao excluir a imagem do imgur: ' + err);
-        });
-      //Deletar o post do feed do GetStream
-      await client
-        .feed('user', req.body.idUsuario)
-        .removeActivity(req.body.idPost)
-        .then()
-        .catch(err => {
-          if (err) {
-            console.log('Erro ao deletar o post da denúncia:' + err.message);
-          }
-        });
+        await axios.put(rota+'/usuarios/aceitarDenuncia'+ req.body.idDenuncia)
+            .then( apiResponse => {
+                    //Deletar a imagem do post do Imgur
+                    axios
+                        .delete('https://api.imgur.com/3/image/' + req.body.idImgur, {
+                            headers: {Authorization: `Bearer ${apiKeys.imgurAccessToken}`}
+                        })
+                        .then()
+                        .catch(err => {
+                            console.log('Erro ao excluir a imagem do imgur: ' + err);
+                        })
+                }
+                )
+            .catch(err=>{
+                    console.log("Erro ao aceitar denuncia");
+            }
+            );
       res.end();
     });
 
@@ -189,32 +162,22 @@ class PostsRoute extends Route {
     //Rota para avaliar um post
     //Recebe o ID do post sendo avaliado
     this.router.post('/avaliarPost', async (req, res) => {
-      const client2 = stream.connect(
-        '55j5n3pfjx3u',
-        req.user.userToken,
-        '54136'
-      );
-      let likeID = undefined;
-      let reactions = await client.reactions.filter({
-        activity_id: req.body.postID
-      });
+        let idPost = Number(req.body.postID);
+        let idUsuario = Number(req.body.usuarioID);
+        let curtidas = JSON.parse(req.body.curtidas);
       //Checar se o post já está curtido pelo usuário no momento da chamada
-      reactions.results.forEach(like => {
-        if (like.user_id == req.user.id_usuario) {
-          likeID = like.id;
-        }
-      });
-      if (likeID) {
-        //Descurtir o post, caso ele já tenha sido curtido pelo usuário
-        client.reactions.delete(likeID).catch(err => {
-          console.log(err.message);
-        });
+      if (curtidas.includes(idUsuario)) {
+          axios.delete(rota+"/posts/descurtirPost?id_usuario="+idUsuario+"&id_post="+idPost)
+              .then()
+              .catch(err =>{
+              })
       } else {
-        //Curtir o post, caso ainda não tenha sido curtido pelo usuário
-        await client2.reactions.add('like', req.body.postID).catch(err => {
-          console.log(err.message);
-        });
+          axios.post(rota+"/posts/curtirPost?id_usuario="+idUsuario+"&id_post="+idPost)
+              .then()
+              .catch(err =>{
+              })
       }
+      res.end();
     });
   }
 }

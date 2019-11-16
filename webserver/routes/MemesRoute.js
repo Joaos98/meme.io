@@ -168,18 +168,14 @@ class MemesRoute extends Route {
     //Recebe o ID do meme específico
     this.router.post('/acessarPerfilMeme', async (req, res) => {
       let meme = {};
-      let feed;
+      let feed = [];
       let seguidores = [];
-      //Pegar o feed do meme para exibir no perfil
-      await client
-        .feed('meme', req.body.memeID)
-        .get({ limit: 20, offset: 0, reactions: { own: true, counts: true } })
-        .then(apiResponse => {
-          feed = apiResponse;
-        })
-        .catch(err => {
-          console.log('Erro ao buscar feed.' + err.message);
-        });
+      //buscar feed do meme
+        await axios
+            .get(rota + '/posts/feedmeme?id_meme=' + req.body.memeID)
+            .then(apiResponse => {
+                feed = apiResponse.data;
+            });
       //Enviar a requisição com o ID para a API fazer a busca no BD
       await axios
         .get(rota + '/memes/?_id=' + req.body.memeID)
@@ -189,22 +185,16 @@ class MemesRoute extends Route {
         .catch(err => {
           console.log('Erro ao buscar meme: ' + err);
         });
-      //Pegar os seguidores do meme para que a página saiba se o usuário segue ou não o meme visitado
-      await client
-        .feed('meme', req.body.memeID)
-        .followers()
-        .then(results => {
-          results.results.forEach(objeto => {
-            seguidores.push(objeto.feed_id.substring(9));
-          });
-        })
-        .catch(err => {
-          console.log(err.message);
-        });
-      //Checar se o feed do meme existe
-      if (feed == undefined) {
-        feed = {};
-      }
+
+        //Pegar os seguidores do meme para que a página saiba se o usuário segue ou não o meme visitado
+        await axios
+            .get(rota + '/memes/seguidores?id=' + req.body.memeID)
+            .then(apiResponse => {
+                seguidores = apiResponse.data[0].id_usuario;
+            })
+            .catch(err => {
+                console.log('Erro ao buscar meme: ' + err);
+            });
       //Renderizar a página do perfil com as informações do meme específico.
       res.render('perfilMeme.ejs', {
         meme: meme,

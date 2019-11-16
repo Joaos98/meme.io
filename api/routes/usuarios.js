@@ -195,7 +195,7 @@ router.put('/aceitarDenuncia:idDenuncia', async (req, res) => {
 //Rota que realiza o unfollow de um meme por um usuário
 //Recebe o ID do usuário e o ID do meme através do path da chamada
 router.put('/unfollowMeme:usuarioID/:memeID', (req, res) => {
-  postgres.query('call unfollowMeme($1, $2)', [req.params.memeID, req.params.usuarioID], (err, resultado) => {
+  postgres.query('delete from meme_seguido where id_meme = $1 and id_usuario = $2', [req.params.memeID, req.params.usuarioID], (err, resultado) => {
     if (err) {
       console.log(err);
       res.status(400).send(err);
@@ -208,7 +208,7 @@ router.put('/unfollowMeme:usuarioID/:memeID', (req, res) => {
 //Rota que realiza o follow de um meme por um usuário
 //Recebe o ID do usuário e o ID do meme através do path da chamada
 router.put('/seguirMeme:usuarioID/:memeID', (req, res) => {
-  postgres.query('call followMeme($1, $2)', [req.params.memeID, req.params.usuarioID], (err, resultado) => {
+  postgres.query('insert into meme_seguido values ($1, $2)', [req.params.memeID, req.params.usuarioID], (err, resultado) => {
     if (err) {
       console.log(err);
       res.status(400).send(err);
@@ -221,7 +221,7 @@ router.put('/seguirMeme:usuarioID/:memeID', (req, res) => {
 //Rota que realiza o unfollow de um usuário por outro usuário
 //Recebe os IDs dos dois usuários através do path da chamada
 router.put('/unfollowUsuario:usuarioID/:usuarioVisitadoID', (req, res) => {
-  postgres.query('call unfollowUsuario($1, $2)', [req.params.usuarioVisitado, req.params.usuarioID], (err, resultado) => {
+  postgres.query('delete from usuario_seguido where id_usuario_seguido = $1 and id_usuario_seguidor = $2', [req.params.usuarioVisitadoID, req.params.usuarioID], (err, resultado) => {
     if (err) {
       console.log(err);
       res.status(400).send(err);
@@ -234,7 +234,7 @@ router.put('/unfollowUsuario:usuarioID/:usuarioVisitadoID', (req, res) => {
 //Rota que realiza o follow de um usuário por outro usuário
 //Recebe os IDs dos dois usuários através do path da chamada
 router.put('/seguirUsuario:usuarioID/:usuarioVisitadoID', (req, res) => {
-  postgres.query('call followUsuario($1, $2)', [req.params.usuarioVisitado, req.params.usuarioID], (err, resultado) => {
+  postgres.query('insert into usuario_seguido values ($1, $2)', [req.params.usuarioID, req.params.usuarioVisitadoID], (err, resultado) => {
     if (err) {
       console.log(err);
       res.status(400).send(err);
@@ -242,6 +242,18 @@ router.put('/seguirUsuario:usuarioID/:usuarioVisitadoID', (req, res) => {
       res.status(200).send();
     }
   });
+});
+
+router.get('/seguidores', (req, res) =>{
+  let query = 'SELECT   ARRAY_AGG(distinct us.id_usuario_seguidor) id_usuario FROM usuario_seguido us ' +
+      'WHERE us.id_usuario_seguido = $1 ';
+  postgres.query(query, [req.query.id], (err, resultado) =>{
+    if (err){
+      res.status(400).send(err);
+    }else{
+      res.status(200).send(resultado.rows);
+    }
+  })
 });
 
 module.exports = router;

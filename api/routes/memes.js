@@ -23,11 +23,15 @@ router.post('/', (req, res) => {
 router.get('/', (req, res) => {
   let query = 'SELECT * FROM memes';
   let categorias = [];
+
+  if(req.query._id){
+    query += ' where id_meme = ' + req.query._id;
+  }
+
   if (req.query.categorias) {
     //Recebe uma string com as categorias para a busca no formato "Categoria;Categoria;Categoria..."
     //Transformar a string com múltiplas categorias em um vetor
     categorias = req.query.categorias.split(';');
-
     query += ' where ';
     let cont = 1;
     categorias.forEach(categoria => {
@@ -38,12 +42,6 @@ router.get('/', (req, res) => {
       cont++;
     })
   }
-  console.log("REQ.QUERY.CATEROGIAS");
-  console.log(req.query.categorias);
-  console.log("CATEGORIAS");
-  console.log(categorias);
-  console.log("QUERY");
-  console.log(query);
   postgres.query(query, categorias, (err, resultado) => {
     if (err){
       res.status(400).send(err);
@@ -127,6 +125,18 @@ router.put('/aprovarMeme:idMeme', (req, res) => {
       res.status(200).send();
     }
   });
+});
+
+router.get('/seguidores', (req, res) =>{
+  let query = 'SELECT ARRAY_AGG(ms.id_usuario) id_usuario FROM meme_seguido ms ' +
+      'WHERE ms.id_meme = $1';
+  postgres.query(query, [req.query.id], (err, resultado) =>{
+    if (err){
+      res.status(400).send(err);
+    }else{
+      res.status(200).send(resultado.rows);
+    }
+  })
 });
 
 module.exports = router;

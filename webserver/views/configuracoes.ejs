@@ -211,20 +211,20 @@
                                 </div>
                             </div>
                             <% denuncias.forEach(denuncia => { %>
-                                <div class="row" id="<%= denuncia._id %>" >
+                                <div class="row" id="<%= denuncia.id_denuncia %>" >
                                     <div class="col-sm-3">
-                                        <img src="<%= denuncia.postUrlImgur %>">
+                                        <img src="<%= denuncia.urlimgur %>">
                                     </div>
                                     <div class="col-sm-3">
-                                        <%= denuncia.postConteudo %>
+                                        <%= denuncia.postconteudo %>
                                     </div>
                                     <div class="col-sm-3">
-                                        <%= denuncia.conteudo %>
+                                        <%= denuncia.conteudo%>
                                     </div>
                                     <div class="col-sm-3 d-flex justify-content-center">
                                         <!-- FAZER OS BOTÕES FUNCIONAREM -->
-                                        <button type="submit" style="margin: 2px;" class="btn btn-memeIO" onclick="aceitarDenuncia('<%= denuncia._id %>','<%= denuncia.usuarioID %>','<%= denuncia.postID %>', '<%= denuncia.idImgur %>');"><i class="fas fa-check"></i></button>
-                                        <button type="submit" style="margin: 2px;" class="btn btn-memeIO" onclick="recusarDenuncia('<%= denuncia._id %>');"><i class="fas fa-trash-alt"></i></button>
+                                        <button type="submit" style="margin: 2px;" class="btn btn-memeIO" onclick="aceitarDenuncia('<%= denuncia.id_denuncia %>','<%= denuncia.id_usuario %>','<%= denuncia.id_post %>', '<%= denuncia.idimgur %>');"><i class="fas fa-check"></i></button>
+                                        <button type="submit" style="margin: 2px;" class="btn btn-memeIO" onclick="recusarDenuncia('<%= denuncia.id_denuncia %>');"><i class="fas fa-trash-alt"></i></button>
                                     </div>
                                 </div>
                             <% })%>

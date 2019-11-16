@@ -56,7 +56,7 @@
                     <div id="associarMemeSearch" class="d-flex flex-wrap" style="padding: 10px; height: 300px; overflow: auto; margin-top: 5px;">
                         <% memes.forEach(meme => { %>
                             <% if (meme.status == 1) {%>
-                                <img data-idMeme="<%= meme._id %>" onclick="associarMeme(this)" data-dismiss="modal" style="cursor:pointer;" class="memeImage" src="<%= meme.urlImgur %>">
+                                <img data-idMeme="<%= meme.id_meme %>" onclick="associarMeme(this)" data-dismiss="modal" style="cursor:pointer;" class="memeImage" src="<%= meme.urlimgur %>">
                             <% } %>
                         <% }); %>
                     </div>

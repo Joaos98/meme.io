@@ -1,25 +1,25 @@
-<% feed.results.forEach(post => { %>
-    <div id="<%= post.id %>" class="post">
+<% feed.forEach(post => { %>
+    <div id="<%= post.id_post %>" class="post">
         <div class="row" style="position:relative; padding-right: 130px">
-            <img class="fotoUsuarioPost" src="<%= post.urlImgUsuario %>">
+            <img class="fotoUsuarioPost" src="<%= post.foto %>">
             <h4><%= post.nome %></h4>
 
             <div style="position:absolute; right: 0;">
-                <% if (usuario){%>
-                    <% if (post.own_reactions.like) { %>
-                        <% if (post.own_reactions.like.filter(like => (like.user_id == usuario.id_usuario)).length == 1){ %>
-                            <button class="btn-memeIO btn" onclick="avaliarPost('<%= post.id %>','<%= usuario.id_usuario %>', this)">
+                <%if (usuario){%>
+                    <% if (post.reacoes) { %>
+                        <% if (post.reacoes.filter(like => (like == usuario.id_usuario)).length == 1){ %>
+                            <button class="btn-memeIO btn" onclick="avaliarPost('<%= post.id_post %>','<%= usuario.id_usuario %>','<%= JSON.stringify(post.reacoes)%>', this)">
                                 <i class="fas fa-laugh-squint fa-lg liked"></i>
-                                <span><%= post.reaction_counts.like %></span>
+                                <span><%= quantidadeLikes(post.reacoes) %></span>
                             </button>
                         <% }else { %>
-                                <button class="btn-memeIO btn" onclick="avaliarPost('<%= post.id %>','<%= usuario.id_usuario %>', this)">
+                                <button class="btn-memeIO btn" onclick="avaliarPost('<%= post.id_post %>','<%= usuario.id_usuario %>','<%= JSON.stringify(post.reacoes)%>', this)">
                                     <i class="fas fa-laugh-squint fa-lg"></i>
-                                    <span><%= post.reaction_counts.like %></span>
+                                    <span><%= quantidadeLikes(post.reacoes) %></span>
                                 </button>
                         <% }; %>
                     <% }else { %>
-                            <button class="btn-memeIO btn" onclick="avaliarPost('<%= post.id %>','<%= usuario.id_usuario %>', this)">
+                            <button class="btn-memeIO btn" onclick="avaliarPost('<%= post.id_post %>','<%= usuario.id_usuario %>', this)">
                                 <i class="fas fa-laugh-squint fa-lg"></i>
                                 <span>0</span>
                             </button>
@@ -28,8 +28,8 @@
                     <button class="btn btn-memeIO" data-toggle="modal" data-target="#denunciarPublicação" onclick="associarIdPost(<%= JSON.stringify(post) %>)">
                         <i class="fas fa-flag"></i>
                     </button>
-                    <% if (usuario.id_usuario == post.actor.substring(5) || usuario.adm == 1) { %>
-                        <button class="btn btn-memeIO" onclick="deletarPost('<%= post.id %>', '<%= post.actor.substring(5) %>', '<%= post.idImgur %>')">
+                    <% if (usuario.id_usuario == post.id_usuario || usuario.adm == 1) { %>
+                        <button class="btn btn-memeIO" onclick="deletarPost('<%= post.id_post %>', '<%= post.id_usuario %>', '<%= post.idimgur %>')">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     <% } %>
@@ -38,7 +38,7 @@
         </div>
         <div class="row">
             <p style="width: 100%;"><%= post.conteudo%></p>
-            <img src="<%= post.url %>">
+            <img src="<%= post.urlimgur %>">
         </div>
 
     </div>
@@ -68,3 +68,13 @@
         </div>
     </div>
 </div>
+
+<%
+    function quantidadeLikes(array){
+        if(array[0] == null){
+            return 0;
+        } else{
+            return array.length;
+        }
+    }
+%>

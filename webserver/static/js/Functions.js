@@ -4,7 +4,7 @@ function associarMeme(meme) {
 }
 
 function associarIdPost(post) {
-  document.getElementById('inputIdDenuncia').value = post.id;
+  document.getElementById('inputIdDenuncia').value = post.id_post;
   document.getElementById('inputIdUsuario').value = post.actor.substring(5);
   document.getElementById('inputPostUrlImgur').value = post.url;
   document.getElementById('inputPostConteudo').value = post.conteudo;
@@ -17,11 +17,7 @@ function denunciarPublicacao() {
   xmlhttp.setRequestHeader('Content-Type', 'application/json');
   const denuncia = {
     conteudo: document.getElementById('conteudoDenuncia').value,
-    conteudoPost: document.getElementById('inputPostConteudo').value,
-    idPost: document.getElementById('inputIdDenuncia').value,
-    idUsuario: document.getElementById('inputIdUsuario').value,
-    urlImgur: document.getElementById('inputPostUrlImgur').value,
-    idImgur: document.getElementById('inputPostIdImgur').value
+    idPost: document.getElementById('inputIdDenuncia').value
   };
   const denunciaString = JSON.stringify(denuncia);
   xmlhttp.send(denunciaString);
@@ -107,14 +103,14 @@ function deletarPost(idPost, idUsuario, idImgur) {
   };
 }
 
-function avaliarPost(idPost, idUsuario, botao) {
+function avaliarPost(idPost, idUsuario, curtidas, botao) {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open('POST', '/posts/avaliarPost', true);
   xmlhttp.setRequestHeader(
     'Content-Type',
     'application/x-www-form-urlencoded;charset=UTF-8'
   );
-  xmlhttp.send('postID=' + idPost + '&usuarioID=' + idUsuario);
+  xmlhttp.send('postID=' + idPost + '&usuarioID=' + idUsuario + '&curtidas=' + curtidas);
   botao.childNodes[1].classList.toggle('liked');
 }
 
@@ -149,3 +145,5 @@ function seguirUsuario(idUsuarioVisitado, idUsuario, botao) {
     botao.innerText = 'Seguir';
   }
 }
+
+
